@@ -1,2 +1,5 @@
 # Ignore text editor backup files
 *~
+
+# Ignore .dsStore files the mac likes to create
+.DS_Store
