@@ -1,10 +1,9 @@
 require_relative 'spec_helper'
 require 'vcr'
 require 'webmock'
-require 'twitter'
 
 describe TwitterConnector do
-  
+
   VCR.configure do |c|
     c.cassette_library_dir = 'spec/fixtures/vcr_cassettes'
     c.hook_into :webmock
@@ -26,7 +25,7 @@ describe TwitterConnector do
 
     context 'with valid input: 52.47, -1.48, 15' do
       subject { twitter.generateBoundingBox 52.47, -1.48, 15 }
-      specify('bounding box should == -1.8359771880161577,52.25314522071962,-1.1240228119838427,52.686854779280395') { subject.should == "-1.8359771880161577,52.25314522071962,-1.1240228119838427,52.686854779280395" }                                     
+      specify('bounding box should == -1.8359771880161577,52.25314522071962,-1.1240228119838427,52.686854779280395') { subject.should == "-1.8359771880161577,52.25314522071962,-1.1240228119838427,52.686854779280395" }
     end
 
     context 'with invalid input' do
@@ -57,17 +56,17 @@ describe TwitterConnector do
 
     context 'from coordinates 52.47, -1.48 with radius 5.2' do
       specify ('there should be 100 results') do
-        VCR.use_cassette "getTweetsUntilX" do 
+        VCR.use_cassette "getTweetsUntilX" do
           test_case.size.should equal 100
-        end 
+        end
       end
 
       specify ('the results should be of type Tweet') do
-        VCR.use_cassette "getTweetsUntilX" do 
+        VCR.use_cassette "getTweetsUntilX" do
           test_case.each do |tweet|
-            tweet.should be_a_kind_of Twitter::Tweet 
+            tweet.should be_a_kind_of Twitter::Tweet
           end
-        end 
+        end
       end
 
     end
