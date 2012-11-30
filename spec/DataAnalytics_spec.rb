@@ -1,7 +1,6 @@
 require_relative "spec_helper"
 require 'vcr'
 require 'webmock'
-require 'alchemy_api'
 
 describe DataAnalytics do
 
@@ -19,11 +18,12 @@ describe DataAnalytics do
 
   context "extractKeywordsFunction" do
 
-    lambda{ subject.extractKeywords "I love Apple and Steve Jobs" }
-
     context 'with a tweet about Apple' do
+
       specify ('The keyword should be Steve Jobs') do
+
         VCR.use_cassette("keywordExtraction") do
+          subject.extractKeywords "I love Apple and Steve Jobs"
           data_analytics.keywords_count["Steve Jobs"].should equal 1
         end
       end
