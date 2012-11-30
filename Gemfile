@@ -10,8 +10,7 @@ group :development do
   gem 'twitter' # For working with the twitter REST API
   gem 'tweetstream' # For working with the twitter streaming API
   gem 'alchemy-api-rb', :require => 'alchemy_api' # For working with the alchemy API
-  gem 'calais' # For working with the open calais API
-  gem 'highscore' # Keyword extraction
+  gem 'parseconfig' # For parsing configuration files
 end
 
 group :test do
@@ -20,4 +19,4 @@ group :test do
   gem 'guard-rspec'  # Automatically run the test suite when a file is modified
   gem 'vcr' # For testing API calls
   gem 'webmock' # For testing API calls
-end 
+end

@@ -3,3 +3,6 @@
 
 # Ignore .dsStore files the mac likes to create
 .DS_Store
+
+# Ignore the configuration file
+configuration
