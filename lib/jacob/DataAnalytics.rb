@@ -3,11 +3,13 @@ require 'parseconfig'
 
 class DataAnalytics
 
-  attr_accessor :keywords_count
+  attr_accessor :keywords_count, :images
 
   def initialize
     #A new hash to store the keywords in
     @keywords_count = Hash.new(0)
+    # An array to store the URL of any images
+    @images = Array.new
 
     # Set up alchemy
     configuration = ParseConfig.new( '/home/aaronkalair/Desktop/Dropbox/University/Year 3/CS310 Project/jacob/lib/jacob/configuration' )
@@ -31,12 +33,16 @@ class DataAnalytics
 
   #Extracts any hashtags from tweets
   def extractHashTags tweet
-
+    tweet.scan(/#\w+/).each do |hashtag|
+      @keywords_count[hashtag] = @keywords_count[hashtag]
+    end
   end
 
   #Extracts any image urls from tweets
   def  extractImages tweet
-
+    tweet.scan(/pic.twitter.com\/\w+/).each do |image|
+      @images << image
+    end
   end
 
 
