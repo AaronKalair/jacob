@@ -1,6 +1,7 @@
 require 'geokit'
 require 'twitter'
 require 'tweetstream'
+require_relative('../../MyConfig')
 
 class TwitterConnector
 
@@ -9,22 +10,23 @@ class TwitterConnector
   def initialize lat, lng, radius
     @lat, @lng, @radius = lat, lng, radius
 
-    configuration = ParseConfig.new( '/home/aaronkalair/Desktop/Dropbox/University/Year 3/CS310 Project/jacob/lib/jacob/configuration' )
+    @extractor = DataAnalytics.new
+    generateBoundingBox
 
     # Configure the authentication data for the Twitter REST API
     Twitter.configure do |config|
-      config.consumer_key       = configuration["twitter_consumer_key"]
-      config.consumer_secret    = configuration["twitter_consumer_secret"]
-      config.oauth_token        = configuration["twitter_oauth_token"]
-      config.oauth_token_secret = configuration["twitter_oauth_token_secret"]
+      config.consumer_key       = MyConfig::TWITTER_CONSUMER_KEY
+      config.consumer_secret    = MyConfig::TWITTER_CONSUMER_SECRET
+      config.oauth_token        = MyConfig::TWITTER_OAUTH_TOKEN
+      config.oauth_token_secret = MyConfig::TWITTER_OAUTH_TOKEN_SECRET
     end
 
     # Configure the authentication for the Twitter streaming API
     TweetStream.configure do |config|
-      config.consumer_key       = configuration["twitter_consumer_key"]
-      config.consumer_secret    = configuration["twitter_consumer_secret"]
-      config.oauth_token        = configuration["twitter_oauth_token"]
-      config.oauth_token_secret = configuration["twitter_oauth_token_secret"]
+      config.consumer_key       = MyConfig::TWITTER_CONSUMER_KEY
+      config.consumer_secret    = MyConfig::TWITTER_CONSUMER_SECRET
+      config.oauth_token        = MyConfig::TWITTER_OAUTH_TOKEN
+      config.oauth_token_secret = MyConfig::TWITTER_OAUTH_TOKEN_SECRET
       config.auth_method        = :oauth
     end
 
@@ -68,16 +70,49 @@ class TwitterConnector
     TweetStream::Client.new.on_error do |message|
       puts "Error: #{message.to_s} "
     end.locations(bounding_box) do |status|
-      # Check the status is actually within our bounding box
-      unless status.geo.nil?
-        if validLocation? status.geo.coords[0], status.geo.coords[1]
-          puts status.text
-        end
-      else
-        puts status.text
+
+      # We can get images hosted by twitter here:
+      status.media.each do |image|
+        # Add the image to our collection of images
+        @extractor.images << image.media_url
+        status.text.gsub!(image.display_url, "")
       end
+
+      @extractor.printKeywords
+      puts "\n"
+      @extractor.printImages
+      puts "\n"
+
+      # Process this status
+      handleTweet status
+
     end
 
+  end
+
+  # The main method which starts trending topic discovery
+  def getTrends
+    # Get the keywords from the last 100 tweets in the area
+    getAllTweetsUntilX.each do |status|
+      puts "processing " + status.text
+      handleTweet status
+    end
+    # Process the incoming keywords
+    bounding = generateBoundingBox
+    getIncomingTweets bounding
+  end
+
+  # Checks if a given status is within the bounding box (because Twitter sometimes returns tweets that are not) and then sends it off to have the data extracted
+  def handleTweet status
+    # If we have geo data we can check ourselves that its within the bounding box
+    unless status.geo.nil?
+        if validLocation? status.geo.coords[0], status.geo.coords[1]
+          @extractor.processTweet status.text
+        end
+    # If we don't have any geo data attached to the tweet we'll have to take Twitters word that its within the bounding box
+    else
+      @extractor.processTweet status.text
+    end
   end
 
 end
