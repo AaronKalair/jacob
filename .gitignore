@@ -4,5 +4,6 @@
 # Ignore .dsStore files the mac likes to create
 .DS_Store
 
-# Ignore the configuration file
+# Ignore the configuration files
 MyConfig.rb
+url_expander_credentials.yml
