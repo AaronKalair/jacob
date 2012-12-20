@@ -5,4 +5,4 @@
 .DS_Store
 
 # Ignore the configuration file
-configuration
+MyConfig.rb
