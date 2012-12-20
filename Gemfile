@@ -10,7 +10,9 @@ group :development do
   gem 'twitter' # For working with the twitter REST API
   gem 'tweetstream' # For working with the twitter streaming API
   gem 'alchemy-api-rb', :require => 'alchemy_api' # For working with the alchemy API
-  gem 'parseconfig' # For parsing configuration files
+  gem 'url_expander' # For expanding URLs in tweets
+  gem 'twitter-text' # For extracting URLS from tweets
+  gem 'instagram' # For getting instagram pictures
 end
 
 group :test do
