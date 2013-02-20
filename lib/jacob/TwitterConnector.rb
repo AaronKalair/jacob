@@ -3,9 +3,10 @@ require 'twitter'
 require 'tweetstream'
 require_relative('../../MyConfig')
 
+
 class TwitterConnector
 
-  attr_accessor :lat, :lng, :radius, :bounding_box
+  attr_accessor :lat, :lng, :radius, :bounding_box, :extractor
 
   def initialize lat, lng, radius
     @lat, @lng, @radius = lat, lng, radius
@@ -78,40 +79,109 @@ class TwitterConnector
         status.text.gsub!(image.display_url, "")
       end
 
-      @extractor.printKeywords
-      puts "\n"
-      @extractor.printImages
-      puts "\n"
-
       # Process this status
-      handleTweet status
-
+      handleTweet status, true
     end
-
   end
 
   # The main method which starts trending topic discovery
   def getTrends
-    # Get the keywords from the last 100 tweets in the area
-    getAllTweetsUntilX.each do |status|
-      puts "processing " + status.text
-      handleTweet status
+    # Split the 100 tweets into 8 groups of 13
+    tweets = getAllTweetsUntilX.each_slice(13).to_a
+
+    # Use 8 threads to process these tweets
+    t1 = Thread.new do
+      unless tweets[0].nil?
+        tweets[0].each do |status|
+          handleTweet status, false
+        end
+      end
     end
+
+    t2 = Thread.new do
+      unless tweets[1].nil?
+        tweets[1].each do |status|
+          handleTweet status, false
+        end
+      end
+    end
+
+    t3 = Thread.new do
+      unless tweets[2].nil?
+        tweets[2].each do |status|
+          handleTweet status, false
+        end
+      end
+    end
+
+    t4 = Thread.new do
+      unless tweets[3].nil?
+        tweets[3].each do |status|
+          handleTweet status, false
+        end
+      end
+    end
+
+    t5 = Thread.new do
+      unless tweets[4].nil?
+        tweets[4].each do |status|
+          handleTweet status, false
+        end
+      end
+    end
+
+    t6 = Thread.new do
+      unless tweets[5].nil?
+        tweets[5].each do |status|
+          handleTweet status, false
+        end
+      end
+    end
+
+    t7 = Thread.new do
+      unless tweets[6].nil?
+        tweets[6].each do |status|
+          handleTweet status, false
+        end
+      end
+    end
+
+    t8 = Thread.new do
+      unless tweets[7].nil?
+        tweets[7].each do |status|
+          handleTweet status, false
+        end
+      end
+    end
+
+    # Wait for all the threads to finish
+    t1.join
+    t2.join
+    t3.join
+    t4.join
+    t5.join
+    t6.join
+    t7.join
+    t8.join
+
     # Process the incoming keywords
     bounding = generateBoundingBox
     getIncomingTweets bounding
   end
 
   # Checks if a given status is within the bounding box (because Twitter sometimes returns tweets that are not) and then sends it off to have the data extracted
-  def handleTweet status
+  def handleTweet status, live=true
     # If we have geo data we can check ourselves that its within the bounding box
     unless status.geo.nil?
         if validLocation? status.geo.coords[0], status.geo.coords[1]
           @extractor.processTweet status.text
         end
-    # If we don't have any geo data attached to the tweet we'll have to take Twitters word that its within the bounding box
+    # If we don't have any geo data attached to the tweet and it is from a live tweet discard it
     else
-      @extractor.processTweet status.text
+      # The oldest 100 tweets never have geo data so we take twittters word that they're from the right area
+      if !live
+        @extractor.processTweet status.text
+      end
     end
   end
 
